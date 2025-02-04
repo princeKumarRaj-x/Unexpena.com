@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unexpena Knowledge Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f5f6fa;
+            color: #2d3436;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #6c5ce7, #a363d9);
+            color: white;
+            margin-bottom: 2rem;
+            border-radius: 0 0 2rem 2rem;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .search-btn {
+            padding: 1rem 2rem;
+            background: #fff;
+            color: #6c5ce7;
+            border: none;
+            border-radius: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: #6c5ce7;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .results-container {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .result-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-title {
+            color: #6c5ce7;
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+        }
+
+        .result-snippet {
+            color: #636e72;
+            line-height: 1.6;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #6c5ce7;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="logo">Unexpena</div>
+            <p>Intelligent Knowledge Discovery</p>
+            <p>Designed by Prince Kumar Raj</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Explore the universe of knowledge...">
+            <button class="search-btn">Search</button>
+        </div>
+
+        <div class="loading">Discovering Insights...</div>
+        <div class="results-container"></div>
+    </div>
+
+    <script>
+        const searchInput = document.querySelector('.search-input');
+        const searchBtn = document.querySelector('.search-btn');
+        const resultsContainer = document.querySelector('.results-container');
+        const loading = document.querySelector('.loading');
+
+        const fetchKnowledge = async (query) => {
+            try {
+                loading.style.display = 'block';
+                resultsContainer.innerHTML = '';
+                
+                const response = await fetch(
+                    `https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=10&srsearch=${query}`
+                );
+                
+                const data = await response.json();
+                displayFindings(data.query.search);
+            } catch (error) {
+                resultsContainer.innerHTML = `<div class="result-card">Error retrieving knowledge</div>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        };
+
+        const displayFindings = (findings) => {
+            findings.forEach(item => {
+                const resultElement = document.createElement('article');
+                resultElement.className = 'result-card';
+                resultElement.innerHTML = `
+                    <h2 class="result-title">${item.title}</h2>
+                    <p class="result-snippet">${item.snippet}</p>
+                    <a href="https://en.wikipedia.org/?curid=${item.pageid}" target="_blank" class="read-more">Continue Exploration</a>
+                `;
+                resultsContainer.appendChild(resultElement);
+            });
+        };
+
+        searchBtn.addEventListener('click', () => {
+            const query = searchInput.value.trim();
+            if (query) fetchKnowledge(query);
+        });
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = searchInput.value.trim();
+                if (query) fetchKnowledge(query);
+            }
+        });
+    </script>
+</body>
+</html>
